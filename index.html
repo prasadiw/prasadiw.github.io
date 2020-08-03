@@ -1,7 +1,202 @@
 <!DOCTYPE html>
-<html>
+<meta charset="utf-8">
+
+<head>
+      <style>
+         .para {
+            font-size: 16px;
+            font-weight: bold;
+         }
+
+		 .title {
+            fill: blue;
+            font-weight: bold;
+         }
+      </style>
+   </head>
+
+<style> /* set the CSS */
+
+path {
+    stroke: steelblue;
+    stroke-width: 2;
+    fill: none;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: grey;
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    width: 120px;
+    height: 48px;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+</style>
 <body>
-<h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages.</p>
+
+     <div class="header">
+    <h1>Visualization of Startup Investments</h1>
+	<p class="para">This visualization is based on information about start up investments provided by Crunchbase. This provides trends of worldwide Venture Capital investments on year and market basis (2000-2014). </p>
+    <div class="">
+      <a href="totalinvesmentsbyyearstack.html" class="next" style="float:right">Next: Stacked Area Chart - AC Investments for markets by year >> </a>
+    </div>
+    <div style="clear:both"></div>
+
+<!-- load the d3.js library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+
+<script>
+
+// Set the dimensions of the canvas / graph
+var margin = {top: 61, right: 140, bottom: 101, left: 80},
+          width = 960 - margin.left - margin.right,
+          height = 500 - margin.top - margin.bottom;
+
+// Parse the date / time
+var parseDate = d3.time.format("%d-%b-%y").parse;
+var formatTime = d3.time.format("%e %B");
+
+// Set the ranges
+//var x = d3.time.scale().range([0, width]);
+var x = d3.scale.linear().range([0, width]);
+var y = d3.scale.linear().range([height, 0]);
+
+// Define the axes
+var xAxis = d3.svg.axis()
+          .scale(x)
+          .orient("bottom")
+      	  .ticks(14, "Y");
+
+var yAxis = d3.svg.axis().scale(y)
+    .orient("left").ticks(5);
+
+// Define the line
+var valueline = d3.svg.line()
+    .x(function(d) { return x(d.Year); })
+    .y(function(d) { return y(d.TotalFunds); });
+
+// Define the div for the tooltip
+var div = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
+// Adds the svg canvas
+var svg = d3.select("body")
+    .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+// Get the data
+d3.csv("https://raw.githubusercontent.com/prasadiw/datavis/master/data/totalinvesementsbyyear.csv", function(error, data) {
+    data.forEach(function(d) {
+        d.Year = d.Year;
+        d.TotalFunds = +d.TotalFunds;
+    });
+
+    // Scale the range of the data
+    x.domain(d3.extent(data, function(d) { return d.Year; }));
+    y.domain([0, d3.max(data, function(d) { return d.TotalFunds; })]);
+
+    // Add the valueline path.
+    svg.append("path")
+        .attr("class", "line")
+        .attr("d", valueline(data));
+    // Add the scatterplot
+    svg.selectAll("dot")
+        .data(data)
+    .enter().append("circle")
+        .attr("r", 5)
+        .attr("cx", function(d) { return x(d.Year); })
+        .attr("cy", function(d) { return y(d.TotalFunds); })
+        .on("mouseover", function(d) {
+            div.transition()
+                .duration(200)
+                .style("opacity", .9);
+            div	.html("Year: " + d.Year + "<br/>"  + "Investment: $ "+ Math.round((d.TotalFunds),2) + "M")
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+            })
+        .on("mouseout", function(d) {
+            div.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
+
+    // Add the X Axis
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+
+    // Add the Y Axis
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
+
+    svg.append("text")
+          .attr("x", 0)
+          .attr("y", -40)
+          .attr("dy", "0.71em")
+          .attr("fill", "#000")
+          .text("Worldwide Total Startup Investments Trends Over Years")
+          .style("font", "23px avenir")
+          .style("fill", "#000000"); 
+
+    svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("transform", "rotate(-90)")
+        		.attr("x", -250)
+            .attr("y", -60)
+            .attr("dy", "0.3408em")
+            .attr("fill", "#000")
+            .text("Investments in Millions")
+         		.style("font-weight", "bold");
+
+    svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis).append("text")
+         	.attr("x", 350)
+            .attr("y", 36)
+            .attr("fill", "#000")
+            .text("Year")
+          	.style("font-weight", "bold");
+
+    svg.append("text")
+          .attr("x", 0)
+          .attr("y", 402)
+          .attr("dy", "0em")
+          .style("font", "16px avenir")
+          .style("fill", "#000000")
+          .text("This is a plot of the trends of worldwide Venture Capital investemts for year 2000 - 2014. We can see year 2012 has the highest investments");
+        
+          svg.append("text")
+          .attr("x", 0)
+          .attr("y", 402)
+          .attr("dy", "1em")
+          .style("font", "16px avenir")
+          .style("fill", "#000000")
+          .text(" on startups all over the world.");	
+
+});
+
+</script>
 </body>
-</html>
