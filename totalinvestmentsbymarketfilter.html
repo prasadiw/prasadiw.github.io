@@ -11,7 +11,7 @@
 		 .title {
             fill: blue;
             font-weight: bold;
-			font-size: 14px;
+			    font-size: 14px;
          }
       </style>
       <title></title>
@@ -31,7 +31,7 @@
 <script src="https://d3js.org/d3.v4.js"></script>
 <br />
 <!-- Initialize a select button -->
-<select id="selectButton"></select>
+<select class="title" id="selectButton"></select>
 
 <!-- Create a div where the graph will take place -->
 <div id="my_dataviz"></div>
@@ -71,7 +71,7 @@ var svg = d3.select("#my_dataviz")
           .attr("dy", "0em")
           .style("font", "16px avenir")
           .style("fill", "#000000")
-          .text("This is a plot of the trends of worldwide Venture Capital funding for each main market through out years 2000-2014. You can visualize each market ");
+          .text("This is a plot of the trends of worldwide Venture Capital funding for each main market through out years 2000-2014.");
 
           svg.append("text")
           .attr("x", 0)
@@ -79,7 +79,7 @@ var svg = d3.select("#my_dataviz")
           .attr("dy", "1em")
           .style("font", "16px avenir")
           .style("fill", "#000000")
-          .text(" using the provided filter on the top right corner above the chart.");
+          .text("You can visualize each market using the provided filter on the top right corner above the chart.");
 
 //Read the data
 d3.csv("https://raw.githubusercontent.com/prasadiw/datavis/master/data/totalinvestmentsbymarketfilter.csv", function(data) {
